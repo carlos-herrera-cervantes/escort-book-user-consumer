@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Dictum struct {
 	Id               string
@@ -11,3 +15,5 @@ type Dictum struct {
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 }
+
+func (d *Dictum) SetDefaultValues() { d.Id = uuid.NewString() }
