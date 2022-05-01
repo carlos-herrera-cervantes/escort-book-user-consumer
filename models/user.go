@@ -8,10 +8,10 @@ import (
 
 type User struct {
 	Id        string
-	UserId    string
+	UserId    string `json:"_id"`
 	FirstName string
 	LastName  string
-	Email     string
+	Email     string `json:"email"`
 	Deleted   bool
 	CreatedAt time.Time
 	UpdatedAt time.Time

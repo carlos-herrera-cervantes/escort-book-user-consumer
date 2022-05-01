@@ -18,11 +18,11 @@ type UserRepository struct {
 }
 
 func (r *UserRepository) GetByField(ctx context.Context, field, value string) (models.User, error) {
-	query := fmt.Sprintf("SELECT email FROM user WHERE %s = %s", field, value)
+	query := fmt.Sprintf(`SELECT user_id FROM "user" WHERE %s = '%s'`, field, value)
 	row := r.Data.DB.QueryRowContext(ctx, query)
 
 	var user models.User
-	err := row.Scan(&user.Email)
+	err := row.Scan(&user.UserId)
 
 	if err != nil {
 		return models.User{}, err
@@ -32,7 +32,7 @@ func (r *UserRepository) GetByField(ctx context.Context, field, value string) (m
 }
 
 func (r *UserRepository) Create(ctx context.Context, user models.User) error {
-	query := "INSERT INTO user VALUES ($1, $2, $3, $4, $5, $6, $7, $8);"
+	query := `INSERT INTO "user" VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
 	user.SetDefaultValues()
 
 	_, err := r.Data.DB.ExecContext(
