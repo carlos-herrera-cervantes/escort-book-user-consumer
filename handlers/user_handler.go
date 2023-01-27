@@ -3,10 +3,11 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"log"
+
+	"escort-book-user-consumer/config"
 	"escort-book-user-consumer/models"
 	"escort-book-user-consumer/repositories"
-	"log"
-	"os"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
@@ -17,19 +18,18 @@ type UserHandler struct {
 	UserRepository           repositories.IUserRepository
 }
 
-func (h *UserHandler) ProcessMessage(ctx context.Context, message *kafka.Message) {
+func (h *UserHandler) HandleEvent(ctx context.Context, message *kafka.Message) {
 	var user models.User
 	value := message.Value
 
-	json.Unmarshal(value, &user)
-	err := h.UserRepository.Create(ctx, user)
+	_ = json.Unmarshal(value, &user)
 
-	if err != nil {
+	if err := h.UserRepository.Create(ctx, user); err != nil {
 		log.Println("ERROR CREATING THE USER: ", user.Email, err.Error())
 		return
 	}
 
-	fromUser, err := h.UserRepository.GetByField(ctx, "email", os.Getenv("FROM_USER"))
+	fromUser, err := h.UserRepository.GetByField(ctx, "email", config.InitializeDictum().FromUser)
 
 	if err != nil {
 		log.Println("ERROR GETTING THE USER CREATOR: ", err.Error())
@@ -50,9 +50,7 @@ func (h *UserHandler) ProcessMessage(ctx context.Context, message *kafka.Message
 		Comment:          "The user is created by the user consumer component",
 	}
 
-	err = h.DictumRepository.Create(ctx, newDictum)
-
-	if err != nil {
+	if err = h.DictumRepository.Create(ctx, newDictum); err != nil {
 		log.Println("ERROR CREATING THE DICTUM FOR THE USER: ", user.Email, err.Error())
 	}
 }
